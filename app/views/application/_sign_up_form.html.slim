@@ -1,0 +1,52 @@
+.row
+  .small-12.columns.ui.form
+    form#sign-up-form name="modal.signUpForm" novalidate=""
+      .field
+        label Email
+        .ui.icon.input
+          = email_field_tag 'email', '', id: 'sign-up-form-email', 'ng-model' => 'modal.email', \
+            'ng-pattern' => '/([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})/i',
+            placeholder: 'your email address will be the same as your login'
+          i.mail.icon
+
+        / Invalid messages
+        div ng-show="modal.signUpForm.email.$dirty && modal.signUpForm.email.$invalid"
+          .ui.yellow.pointing.above.ui.label ng-show="modal.signUpForm.email.$error"
+            | Not valid email address
+
+          .ui.yellow.pointing.above.ui.label ng-show="modal.signUpForm.email.$error.uniqueEmail"
+            | This email is already exist
+
+        / Valid messages
+        div ng-show="modal.signUpForm.email.$dirty && modal.signUpForm.email.$valid"
+          .ui.green.pointing.above.ui.label ok!
+
+
+      .field
+        label Password
+        .ui.icon.input
+          = password_field_tag 'password', '', id: 'sign-up-form-password', required: true, placeholder: 'imagine strong password with minimum of 8 symbols', 'ng-model' => 'modal.password', 'ng-minlength' => 8
+          i.lock.icon
+
+        / Invalid messages
+        div ng-show="modal.signUpForm.password.$dirty && modal.signUpForm.password.$invalid"
+          .ui.yellow.pointing.above.ui.label ng-show="modal.signUpForm.password.$error.required" Password required
+          .ui.yellow.pointing.above.ui.label ng-show="modal.signUpForm.password.$error.minlength" Minimum password length is 8 symbols
+        / Valid messages
+        div ng-show="modal.signUpForm.password.$valid"
+          .ui.green.pointing.above.ui.label ok!
+
+      .field
+        label Confirm password
+        .ui.icon.input
+          = password_field_tag 'passwordConfirmation', '', id: 'sign-up-form-password-confirmation', required: true, placeholder: 'please retype your new password to confirm changes', \
+          class: 'span7', 'ng-model' => 'modal.passwordConfirmation', 'ng-minlength' => 8
+          i.lock.icon
+
+      / Invalid messages
+      div ng-show="modal.signUpForm.passwordConfirmation.$dirty && modal.signUpForm.passwordConfirmation.$invalid"
+        .ui.yellow.label ng-show="modal.signUpForm.passwordConfirmation.$error.required" Please confirm your password
+        .ui.yellow.label ng-show="modal.password != modal.passwordConfirmation" Passwords are not the same
+      / Valid messages
+      div ng-show="modal.signUpForm.passwordConfirmation.$valid"
+        .ui.green.pointing.above.ui.label ok!

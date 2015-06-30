@@ -1,0 +1,13 @@
+/*
+ * application.css.scss
+ *
+ * Important! Do *not* use Sprockets "require" syntax.
+ * Use @import to include other stylesheets
+ */
+
+@import "bourbon";   // Bourbon helpful mixins
+@import "foundation_and_overrides"; // Gem
+@import "animate";
+@import "semantic-ui";
+@import "all";
+@import "animations";

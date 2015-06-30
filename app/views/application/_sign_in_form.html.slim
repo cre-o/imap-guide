@@ -1,0 +1,31 @@
+.row
+  .small-12.columns.ui.form
+    form#sign-up-form ng-class="{ 'animated shake': modal.formError }" name="modal.signInForm" novalidate=""
+      .field
+        label Email
+        div ng-class="{ 'field error':  modal.signInForm.$invalid && modal.signInForm.email.$invalid || modal.signInForm.$invalid }"
+          .ui.icon.input
+            = email_field_tag 'email', '', id: 'sign-in-form-email', 'ng-model' => 'modal.email', \
+              'ng-pattern' => '/([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})/i'
+            i.user.icon
+
+        div ng-show="modal.signInForm.email.$dirty && modal.signInForm.email.$invalid"
+          .ui.yellow.pointing.above.ui.label ng-show="modal.signInForm.email.$error"
+            | Not valid email address
+
+      .field
+        label Password
+        div ng-class="{ 'field error': modal.signInForm.$invalid && modal.signInForm.password.$invalid || modal.signInForm.$invalid }"
+          .ui.icon.input ng-class=""
+            = password_field_tag 'password', '', id: 'sign-in-form-password', 'ng-model' => 'modal.password', \
+              'ng-minlength' => 8
+            i.lock.icon
+
+        div ng-show="modal.signInForm.password.$dirty && modal.signInForm.password.$invalid"
+          .ui.yellow.pointing.above.ui.label ng-show="modal.signInForm.password.$error.minlength" Minimum password length is 8 symbols
+
+      /.row
+        .small-6.columns.end
+          = link_to 'I forgot my password :\'(', new_user_password_path, class: 'item'
+
+
