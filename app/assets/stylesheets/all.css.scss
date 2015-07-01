@@ -1,6 +1,63 @@
 .angular-google-map-container {
-  margin-top: rem-calc(25);
   height: rem-calc(400);
+}
+
+.b-user-actions {
+  h1, h2, h3, h4, h5 {
+    font-weight: normal;
+  }
+
+  button {
+    font-weight: normal;
+  }
+
+  .field {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+}
+
+#map-render {
+  position: relative;
+  padding: 0;
+
+  #logo {
+    position: absolute;
+    bottom: 50px;
+    right: 35px;
+    z-index: 9;
+
+    img {
+      height: 100px;
+    }
+  }
+
+  .view-ui.item {
+    color: rgba(255,255,255,.9);
+    background-color: rgba(102, 102, 102, .2);
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    display: inline-block;
+    padding: .78571em .95em;
+    vertical-align: middle;
+    line-height: 1;
+    text-decoration: none;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-transition: opacity .2s ease,background .2s ease,box-shadow .2s ease;
+    transition: opacity .2s ease,background .2s ease,box-shadow .2s ease;
+    z-index: 9;
+
+    &:hover {
+      background-color: #666;
+      opacity: .8;
+    }
+  }
 }
 
 #upload-button {
@@ -16,11 +73,38 @@
 }
 
 .uploader-item {
+  padding: 0 1px 1.25rem !important;
   position: relative;
 
+  .controls {
+    text-align: center;
+    height: 25px;
+    margin-bottom: 10px;
+
+    i {
+      color: #fff;
+    }
+
+    .pointing.trash {
+      &:hover {
+        background-color: #d01919;
+      }
+    }
+
+    .pointing.thumbs {
+      &:hover {
+        background-color: #f2c61f;
+      }
+    }
+
+  }
+
+  .image-wrap {
+    position: relative;
+  }
+
   .image {
-    border: solid 4px #FFFFFF;
-    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .2);
     display: inline-block;
     line-height: 0;
     max-width: 100%;
@@ -28,7 +112,11 @@
 
     &:hover {
       cursor: pointer;
-      box-shadow: 0 0 6px 1px rgba(0, 140, 186, 0.5);
+      box-shadow: 0 0 0 8px rgba(255, 255, 255, .8);
+    }
+
+    &.selected {
+      box-shadow: 0 0 0 8px rgba(255, 255, 255, .8);
     }
   }
 
@@ -39,10 +127,20 @@
 
   .ui.ribbon.label {
     position: absolute;
-    left: 0;
+    left: -10px;
     top: 0;
   }
+
+  .description {
+    height: 50px;
+    font-size: 10px;
+    line-height: 10px;
+    padding: 5px;
+    background-color: #fff;
+    color: #999;
+  }
 }
+
 
 [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
   display: none !important;

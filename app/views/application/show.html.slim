@@ -1,20 +1,27 @@
 #l-map ng-controller="MapController"
-  .row
-    .small-12.columns
-      #map-render
-        ui-gmap-google-map center="map.center" zoom="map.zoom" options="map.options" events="map.events"
-          /! Clicked marker position
-          ui-gmap-marker coords="map.clickedMarker" idkey="map.clickedMarker.id" options="map.clickedMarker.options"
-            ui-gmap-window isiconvisibleonclick="true" options="map.infoWindowWithCustomClass.options"
-              | This is my clicked marker!
-              p.muted My marker will reappear when you close me.
+  .row.fluid
+    #map-render.small-12.columns
+      #menu-button.view-ui.item ng-click="app.toggleMenu()"
+        i.sidebar.icon
+        ' Menu
 
-  .row.b-user-actions
+      #logo
+        = image_tag 'logo.svg', height: 100
+
+      ui-gmap-google-map center="map.center" zoom="map.zoom" options="map.options" events="map.events"
+        ui-gmap-marker*{'ng-repeat'=>'marker in markers', 'idKey'=>'marker.id', 'coords'=>'marker.coords',
+        'icon' => 'marker.icon'}
+
+        /! Clicked marker position
+        ui-gmap-marker coords="map.clickedMarker" idkey="map.clickedMarker.id" options="map.clickedMarker.options"
+          ui-gmap-window isiconvisibleonclick="true" options="map.infoWindowWithCustomClass.options"
+
+  .row.b-user-actions ng-show="app.menuActive"
     .small-12.columns ng-controller="UploadsController"
       / Preloader
       div preload-resource="#{@uploads}"
 
-      div ng-show="Auth._currentUser"
+      div.text-center ng-show="Auth._currentUser"
         br
         | Welcome, {{Auth._currentUser.email}}!
 
@@ -22,7 +29,7 @@
           i.sign.out.icon.ui-popup
 
       /! File uploads
-      h1 Add new photo on map
+      h1.text-center Add your's new photo on map
       form.ui.form
         .field
           .ui.action.input
@@ -39,36 +46,55 @@
                 nv-file-drop=""
                 uploader="uploader"]
 
-      h2 Your current photos
-      ul.small-block-grid-7
+      h2.text-center
+        ' Current uploads
 
+      ul.small-block-grid-2.medium-block-grid-3.large-block-grid-5
         / Uploader items
         li.uploader-item ng-repeat=("item in uploader.queue")
-          div ng-class="{ 'ui active dimmer': item.isUploading }"
+          .controls
+            .ui.green.pointing.below.ui.label ng-show="item.state == 'ok'"
+            .ui.pointing.below.ui.label.thumbs
+              i.fa.fa-thumbs-up
+            .ui.pointing.below.ui.label.trash ng-show="item.state == 'pending'"
+              i.fa.fa-trash-o
+
+          div.image-wrap ng-class="{ 'ui active dimmer': item.isUploading }"
             / Fresh label
             .ui.ribbon.mini.label fresh
 
             / Thumbnail render
             .thumbnail.image[
               ng-show="uploader.isHTML5"
-              ng-mouseover="item.showDescription = true"
-              ng-mouseout="item.showDescription  = false"
               title="{{item.file.name}}"
               ng-click="select(item)"
-              ng-thumb="{ file: item._file, width: 100, height: 100 }"]
+              ng-class="{ selected: isSelected(item) }"
+              ng-disabled="!Auth._currentUser"
+              ng-thumb="{ file: item._file, width: 171, height: 171 }"]
 
             / Loading state
             .ui.mini.text.loader Loading
 
             / Image description
-            div ng-show="item.showDescription"
+            div.description
               ' {{item.description}}
 
         / Already added
         li.uploader-item ng-repeat=("item in uploads")
-          img.image ng-src="{{item.thumb_src}}"
+          .controls
+            .ui.green.pointing.below.ui.label ng-show="item.state == 'ok'"
+            .ui.pointing.below.ui.label.thumbs
+              i.fa.fa-thumbs-up
+            .ui.pointing.below.ui.label.trash ng-show="item.state == 'pending'"
+              i.fa.fa-trash-o
 
-          div ng-show="item.showDescription"
+
+          img.image[
+            ng-click="select(item)"
+            ng-class="{ selected: isSelected(item) }"
+            ng-src="{{item.thumb_src}}"]
+
+          div.description
             ' {{item.description}}
 
 
@@ -86,41 +112,4 @@ br
 br
 br
 
-
-/! Modal window
-.ui.modal ng-controller="ModalController as modal"
-  i.close.icon
-  .header
-    | {{modal.currentActionTitle}}
-  .content
-    div ng-if="modal.isSignInForm()"
-      = render 'sign_in_form'
-    div ng-if="modal.isSignUpForm()"
-      = render 'sign_up_form'
-
-  .actions
-    .row
-      div ng-show="modal.isSignInForm()"
-        .small-3.columns
-          = button_tag type: 'submit', id: 'sign-in-button', 'ng-click' => 'modal.signInForm.$valid && modal.submit()', \
-            class: 'ui black button ok labeled left icon' do
-            | Sign in
-            i.sign.in.icon
-
-        .small-6.columns.right.end
-          a.ui.positive.right.labeled.icon.button ng-click="modal.setAction('signUp')" href="#sign-up"
-            | Sign up
-            i.checkmark.icon
-
-      div ng-show="modal.isSignUpForm()"
-        .small-3.columns
-          .left
-            = button_tag type: 'submit', id: 'sign-up-button', 'ng-click' => 'modal.signUpForm.$valid && modal.submit()', \
-              class: 'ui positive right labeled icon button', 'ng-class' => '{ "animated tada": modal.signUpForm.$valid }' do
-              | Sign up
-              i.plus.icon
-
-        .small-6.columns.right.end
-          a.ui.black.button.ok.right.labeled.icon ng-click="modal.setAction('signIn')" href="#log-in"
-            | Go back and log in
-            i.question.icon
+= render 'modal_window'

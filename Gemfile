@@ -38,9 +38,6 @@ gem 'animate-rails'
 # Authentication
 gem 'devise', '~> 3.5.1'
 
-# Forms
-gem 'simple_form', '~> 3.1.0' # Smart form builder
-
 # Decorations
 gem 'draper', '~> 2.1.0'
 
@@ -57,6 +54,9 @@ gem 'js-routes'
 
 # API
 gem 'active_model_serializers'
+
+# Icons
+gem 'font-awesome-rails'
 
 #
 # ==> Template engines

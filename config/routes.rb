@@ -6,8 +6,8 @@ Rails.application.routes.draw do
 
   resource :map, only: :show
   resources :locations
-  resources :uploads, only: :create
+  resources :uploads, only: [:index, :create]
 
-  get '/users/authenticated'
+  get '/user/uploads'
 
 end

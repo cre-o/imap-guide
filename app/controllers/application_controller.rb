@@ -6,6 +6,8 @@ class ApplicationController < ActionController::Base
   before_action :preload_app
   before_action :preload_uploads
 
+  respond_to :json
+
   def show
   end
 
@@ -28,6 +30,16 @@ class ApplicationController < ActionController::Base
       @uploads = {
         uploads: uploads
       }.to_json
+    end
+
+
+  protected
+
+    def validate_rights
+      unless current_user.present?
+        render json: { unauthorised: true }, status: :unprocessable_entity
+        return false
+      end
     end
 
 end

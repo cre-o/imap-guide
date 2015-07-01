@@ -1,0 +1,9 @@
+.row {
+  &.fluid {
+    @include grid-row($behavior: nest-collapse);
+  }
+}
+
+.column, .columns{
+  min-height: 1px;
+}

@@ -1,0 +1,37 @@
+/! Modal window
+.ui.modal ng-controller="ModalController as modal"
+  i.close.icon
+  .header
+    | {{modal.currentActionTitle}}
+  .content
+    div ng-if="modal.isSignInForm()"
+      = render 'sign_in_form'
+    div ng-if="modal.isSignUpForm()"
+      = render 'sign_up_form'
+
+  .actions
+    .row
+      div ng-show="modal.isSignInForm()"
+        .small-6.columns
+          = button_tag type: 'submit', id: 'sign-in-button', 'ng-click' => 'modal.signInForm.$valid && modal.submit()', \
+            class: 'ui button ok labeled left icon' do
+            | Sign in
+            i.sign.in.icon
+
+        .small-6.columns.right.end
+          a.ui.positive.right.labeled.icon.button ng-click="modal.setAction('signUp')" href="#sign-up"
+            | Sign up
+            i.checkmark.icon
+
+      div ng-show="modal.isSignUpForm()"
+        .small-6.columns
+          .left
+            = button_tag type: 'submit', id: 'sign-up-button', 'ng-click' => 'modal.signUpForm.$valid && modal.submit()', \
+              class: 'ui positive right labeled icon button', 'ng-class' => '{ "animated tada": modal.signUpForm.$valid }' do
+              | Sign up
+              i.plus.icon
+
+        .small-6.columns.right.end
+          a.ui.button.ok.right.labeled.icon ng-click="modal.setAction('signIn')" href="#log-in"
+            | Go back
+            i.question.icon

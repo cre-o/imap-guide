@@ -12,7 +12,7 @@ html ng-app="iMap"
     // Passing server data into JS
     = Gon::Base.render_data({camel_case: true})
 
-  body ng-controller="ApplicationController"
+  body ng-controller="ApplicationController as app"
     div ng-cloak="" preload-resource="#{@app}"
     = yield
 

@@ -18,6 +18,6 @@ class UploadSerializer < ActiveModel::Serializer
 
   def thumb_src
     # ActionController::Base.helpers.image_path
-    object.image.url(:thumb, timestamp: false)
+    object.image.url(:medium, timestamp: false)
   end
 end

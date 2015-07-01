@@ -1,5 +1,6 @@
 class UploadsController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create]
+  before_action :validate_rights, only: [:create]
 
   def create
     upload = current_user.uploads.new(upload_params)
@@ -12,6 +13,10 @@ class UploadsController < ApplicationController
       render json: upload.errors, status: :unprocessable_entity,
         content_type: "text/plain" # internet explorer
     end
+  end
+
+  def index
+    render json: Upload.all
   end
 
   private

@@ -4,11 +4,11 @@ class Upload < ActiveRecord::Base
   belongs_to :location
   belongs_to :user
 
-  has_attached_file :image, styles: { thumb: "100x100#" },
+  has_attached_file :image, styles: { small: "171x171#", medium: "310x310#" },
     default_url: "/images/:style/missing.png"
 
   validates_attachment :image, presence: true,
-      :size => { in: 2.kilobytes..5.megabytes },
+      :size => { in: 2.kilobytes..800.kilobytes },
       :content_type => { content_type: ALLOWED_CONTENT_TYPES }
 
   validates :description, length: { maximum: 300 }

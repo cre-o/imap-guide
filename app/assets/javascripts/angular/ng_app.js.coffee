@@ -19,7 +19,13 @@ angular.module('iMap').config (uiGmapGoogleMapApiProvider) ->
 # Application controller
 #
 angular.module('iMap').controller 'ApplicationController', ($scope, modalDialog, Auth, $timeout) ->
+  app = @
+  # Application menu
+  app.menuActive = false
+  app.toggleMenu = ->
+    app.menuActive = if app.menuActive == false then true else false
 
+  # Global features
   $scope.modalDialog = modalDialog
   $scope.Auth = Auth
 
@@ -27,17 +33,38 @@ angular.module('iMap').controller 'ApplicationController', ($scope, modalDialog,
     Auth._currentUser = $scope.preloadResource.user if $scope.preloadResource.user
   , 1
 
-  return $scope
+  return app
 
+#
+# Map controller
+#
+angular.module('iMap').controller 'MapController', ($scope, locationsService) ->
+  $scope.selectedUploads = []
+  $scope.locations       = []
 
-angular.module('iMap').controller 'MapController', ($scope) ->
   # Map center
   objectLatitude  = 55.0385767
   objectLongitude = 67.8679176
 
+  # Default marker
   marker = {
     id: 1
   }
+  # All markers
+  markers = {}
+
+  # Locations
+  locationsService.getLocations().then (d) ->
+    _.each d, (n, key) ->
+      markers["somekey-#{key}"] =
+        id: key
+        coords:
+          latitude: n.lat
+          longitude: n.lng
+        icon: '/assets/location/markers/icon.png'
+
+    $scope.markers = markers
+
 
   $scope.map =
     center: { latitude: objectLatitude, longitude: objectLongitude }
@@ -51,6 +78,11 @@ angular.module('iMap').controller 'MapController', ($scope) ->
       id: 0
       options: {}
     events: click: (mapModel, eventName, originalEventArgs) ->
+
+      # if $scope.selectedUploads.length == 0
+      #   alert 'please, choose any photo to save it on map'
+      #   return false
+
       # 'this' is the directive's scope
       #$log.info 'user defined event: ' + eventName, mapModel, originalEventArgs
       e = originalEventArgs[0]
@@ -59,11 +91,16 @@ angular.module('iMap').controller 'MapController', ($scope) ->
       $scope.map.clickedMarker =
         id: 0
         options:
-          labelContent: 'Photo was saved into this location' # + 'lat: ' + lat + ' lon: ' + lon
+          labelContent: "Photo was saved into this location" # + 'lat: ' + lat + ' lon: ' + lon
           labelClass: 'marker-labels'
           labelAnchor: '50 0'
         latitude: lat
         longitude: lon
+
+      # Save location values into database
+      locationsService.saveLocation(lat, lon, $scope.selectedUploads)
+      $scope.selectedUploads = []
+
       #scope apply required because this event handler is outside of the angular domain
       $scope.$apply()
 
@@ -71,9 +108,8 @@ angular.module('iMap').controller 'MapController', ($scope) ->
 #
 # Uploads controller
 #
-angular.module('iMap').controller 'UploadsController', ($scope, FileUploader, $timeout) ->
+angular.module('iMap').controller 'UploadsController', ($scope, FileUploader, $timeout, uploadsService) ->
   $scope.uploads = []
-  $scope.selectedUploads = []
 
   uploader = $scope.uploader =
     new FileUploader
@@ -88,14 +124,22 @@ angular.module('iMap').controller 'UploadsController', ($scope, FileUploader, $t
   # Get already created uploads
   $timeout ->
     $scope.uploads = $scope.preloadResource.uploads
-
-    console.log $scope.uploads
   , 1
 
   # Select
-  $scope.select = (upload) ->
-    selectedUploads
+  $scope.select = (item) ->
+    if _.findIndex($scope.selectedUploads, item) >= 0
+      $scope.selectedUploads = _.without($scope.selectedUploads, item)
+    else
+      $scope.selectedUploads.push(item)
 
+  $scope.isSelected = (item) ->
+    _.findIndex($scope.selectedUploads, item) >= 0
+
+  # Events
+  $scope.$on 'devise:login', (event, currentUser) ->
+    uploadsService.getUserUploads().then (d) ->
+      $scope.uploads = d
 
   return $scope
 
@@ -139,17 +183,13 @@ angular.module('iMap').controller 'ModalController', ($scope, $http, modalDialog
 
     # SignIn form processing
     if modal.isSignInForm()
-      Auth.login(credentials, config).then ((user) ->
-        #
-      ), (error) ->
+      Auth.login(credentials, config).then (user) ->
+        $scope.currentUser = user
+        modalDialog.hide()
+      , (error) ->
         # Authentication failed...
         modal.formError = true
         modal["#{modal.currentAction}Form"].$invalid = true
-
-      $scope.$on 'devise:login', (event, currentUser) ->
-        $scope.currentUser = currentUser
-        modalDialog.hide()
-
 
     # SignUp form processing
     if modal.isSignUpForm()
@@ -163,16 +203,50 @@ angular.module('iMap').controller 'ModalController', ($scope, $http, modalDialog
         modal.formError = true
         modal["#{modal.currentAction}Form"].$invalid = true
 
-    # $http.post(path, params)
-    #   .success (data, status, headers, config) ->
-    #     modal.hide()
-    #   .error (data, status, headers, config) ->
-    #     modal["#{modal.currentAction}Form"].$invalid = true
-    #     modal.formError = true
-
     return false
 
   return modal
+
+
+#
+# Locations loader
+#
+angular.module('iMap').factory 'locationsService', ($http) ->
+
+  @.getLocations = ->
+    $http.get(Routes.locations_path()).then (response) ->
+      return response.data
+
+  # Save uploads into selected location
+  @.saveLocation = (lat, lng, uploads = []) ->
+    if uploads.length > 0
+      uploads = _.pluck(uploads, 'id')
+
+    params =
+      location:
+        lat: lat
+        lng: lng
+        uploads: uploads
+
+    $http.post(Routes.locations_path(), params)
+      .success (data, status, headers, config) ->
+        console.log data
+      .error (data, status, headers, config) ->
+        # @TODO error action
+
+  return @
+
+
+#
+# Uploads loader
+#
+angular.module('iMap').factory 'uploadsService', ($http) ->
+
+  @.getUserUploads = ->
+    $http.get(Routes.user_uploads_path()).then (response) ->
+      return response.data
+
+  return @
 
 
 # Auth factory with modal initialisation
@@ -208,7 +282,7 @@ angular.module('iMap').directive 'preloadResource', ->
       element.remove()
   }
 
-# Canvas
+# Canvas image as preview
 angular.module('iMap').directive 'ngThumb', [
   '$window'
   ($window) ->
