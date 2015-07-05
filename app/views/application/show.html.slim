@@ -32,7 +32,7 @@
           i.sign.out.icon.ui-popup
 
         br
-        a href="" ng-click="app.toggleToolkit()"
+        a href="" ng-click="app.toggleToolkit()" ng-if="Auth._currentUser.role_id == 2"
           | {{app.toolKitActive ? 'Close' : 'Open'}} admin toolkit
 
       /! Administrator
