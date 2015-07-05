@@ -16,6 +16,6 @@
 #= require angular
 #= require angular/ng_app
 #= require js-routes
-#= require foundation
 #= require semantic-ui
+#= require magnific-popup
 #= require_tree .

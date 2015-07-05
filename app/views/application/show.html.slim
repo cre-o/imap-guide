@@ -1,5 +1,6 @@
 #l-map ng-controller="MapController"
   .row.fluid
+    /! Map render
     #map-render.small-12.columns
       #menu-button.view-ui.item ng-click="app.toggleMenu()"
         i.sidebar.icon
@@ -8,108 +9,140 @@
       #logo
         = image_tag 'logo.svg', height: 100
 
-      ui-gmap-google-map center="map.center" zoom="map.zoom" options="map.options" events="map.events"
-        ui-gmap-marker*{'ng-repeat'=>'marker in markers', 'idKey'=>'marker.id', 'coords'=>'marker.coords',
-        'icon' => 'marker.icon'}
+      ui-gmap-google-map center="map.center" zoom="map.zoom" control="map.control" options="map.options" events="map.events"
+        ui-gmap-markers*{ 'models'=>'markers',
+                         'coords'=> "'self'",
+                         'click' => 'showLocation',
+                         'icon' => "'icon'",
+                         'options' => "'self'"}
 
-        /! Clicked marker position
+        / Marker apears only when clicked on map
         ui-gmap-marker coords="map.clickedMarker" idkey="map.clickedMarker.id" options="map.clickedMarker.options"
           ui-gmap-window isiconvisibleonclick="true" options="map.infoWindowWithCustomClass.options"
 
+  / Actions
   .row.b-user-actions ng-show="app.menuActive"
-    .small-12.columns ng-controller="UploadsController"
-      / Preloader
+    .small-12.columns ng-controller="UploadsController" ng-cloak=""
       div preload-resource="#{@uploads}"
 
       div.text-center ng-show="Auth._currentUser"
         br
         | Welcome, {{Auth._currentUser.email}}!
-
         = link_to destroy_user_session_path, method: :delete, title: 'logout', class: 'item' do
           i.sign.out.icon.ui-popup
 
-      /! File uploads
-      h1.text-center Add your's new photo on map
-      form.ui.form
-        .field
-          .ui.action.input
-            input type="text" ng-model="description" name="upload[description]" placeholder="Description"
+        br
+        a href="" ng-click="app.toggleToolkit()"
+          | {{app.toolKitActive ? 'Close' : 'Open'}} admin toolkit
 
-            button#upload-button.ui.big.yellow.labeled.icon.button ng-click="test"
-              i.photo.icon
-              | Add photo
-              input[
-                name="upload[image]"
-                type="file"
-                ng-disabled="User.isGuest()"
-                nv-file-select=""
-                nv-file-drop=""
-                uploader="uploader"]
+      /! Administrator
+      #admin-toolkit ng-if="Auth._currentUser.role_id == 2"  ng-show="app.toolKitActive" ng-controller="AdministrationController"
+        div preload-resource="#{@pending_uploads}"
+        h2.text-center
+          ' Admin toolkit
+        ul.small-block-grid-2.medium-block-grid-3.large-block-grid-5
+          li.uploader-item ng-repeat=("item in pendingUploads")
+              .controls
+                .ui.pointing.below.ui.label.thumbs ng-class="{ yellow: item.state == 'ok' }"
+                  i.fa.fa-thumbs-up
+                .ui.pointing.below.ui.label.trash ng-click="delete(item)"
+                  i.fa.fa-trash-o
 
-      h2.text-center
-        ' Current uploads
 
-      ul.small-block-grid-2.medium-block-grid-3.large-block-grid-5
-        / Uploader items
-        li.uploader-item ng-repeat=("item in uploader.queue")
-          .controls
-            .ui.green.pointing.below.ui.label ng-show="item.state == 'ok'"
-            .ui.pointing.below.ui.label.thumbs
-              i.fa.fa-thumbs-up
-            .ui.pointing.below.ui.label.trash ng-show="item.state == 'pending'"
-              i.fa.fa-trash-o
+              img.image[
+                ng-click="select(item)"
+                ng-class="{ selected: isSelected(item) }"
+                ng-src="{{item.preview_src}}"]
 
-          div.image-wrap ng-class="{ 'ui active dimmer': item.isUploading }"
-            / Fresh label
-            .ui.ribbon.mini.label fresh
+              div.description
+                ' {{item.description}}
 
-            / Thumbnail render
-            .thumbnail.image[
-              ng-show="uploader.isHTML5"
-              title="{{item.file.name}}"
+
+      /! User & Administror basic actions
+      #user-toolkit ng-class="{ unfocus: app.toolKitActive }"
+        br
+        /! File uploads
+        h1.text-center Add your's new photo on map
+        form.ui.form
+          .field
+            .ui.action.input
+              input type="text" ng-model="description" name="upload[description]" placeholder="Description"
+
+              button#upload-button.ui.big.yellow.labeled.icon.button ng-click="Auth.isAuthenticated() || authoriseWith(modalDialog.show())"
+                i.photo.icon
+                | Add photo
+                input[
+                  ng-if="Auth._currentUser"
+                  name="upload[image]"
+                  type="file"
+                  nv-file-select=""
+                  nv-file-drop=""
+                  uploader="uploader"]
+
+
+        h2.text-center
+          ' Your current uploads
+
+        ul.small-block-grid-2.medium-block-grid-3.large-block-grid-5
+          / Uploader items
+          li.uploader-item ng-repeat=("item in uploader.queue")
+            .controls
+              .ui.pointing.below.ui.label.thumbs ng-class="{ yellow: item.state == 'ok' }"
+                i.fa.fa-thumbs-up
+              .ui.pointing.below.ui.label.trash ng-show="item.isSuccess" ng-click="delete(item)"
+                i.fa.fa-trash-o
+
+            div.image-wrap ng-class="{ 'ui active dimmer': item.isUploading }"
+              / Fresh label
+              .ui.ribbon.mini.label fresh
+
+              / Thumbnail render
+              .thumbnail.image[
+                ng-show="uploader.isHTML5"
+                title="{{item.file.name}}"
+                ng-click="select(item)"
+                ng-class="{ selected: isSelected(item) }"
+                ng-disabled="!Auth._currentUser"
+                ng-thumb="{ file: item._file, width: 171, height: 171 }"]
+
+              / Loading state
+              .ui.mini.text.loader Loading
+
+              / Image description
+              div.description
+                ' {{item.description}}
+
+          / Already added
+          li.uploader-item ng-repeat=("item in uploads")
+            .controls
+              .ui.pointing.below.ui.label.thumbs ng-class="{ yellow: item.state == 'ok' }"
+                i.fa.fa-thumbs-up
+              .ui.pointing.below.ui.label.trash ng-click="delete(item)"
+                i.fa.fa-trash-o
+
+
+            img.image[
               ng-click="select(item)"
               ng-class="{ selected: isSelected(item) }"
-              ng-disabled="!Auth._currentUser"
-              ng-thumb="{ file: item._file, width: 171, height: 171 }"]
+              ng-src="{{item.preview_src}}"]
 
-            / Loading state
-            .ui.mini.text.loader Loading
-
-            / Image description
             div.description
               ' {{item.description}}
 
-        / Already added
-        li.uploader-item ng-repeat=("item in uploads")
-          .controls
-            .ui.green.pointing.below.ui.label ng-show="item.state == 'ok'"
-            .ui.pointing.below.ui.label.thumbs
-              i.fa.fa-thumbs-up
-            .ui.pointing.below.ui.label.trash ng-show="item.state == 'pending'"
-              i.fa.fa-trash-o
 
+        div ng-hide="#{user_signed_in?} || Auth.isAuthenticated()"
+          .ui.message
+            ' You need to
+            a.js-modal> ng-click="modalDialog.show()" href="#" Log in
+            ' to do some actions
 
-          img.image[
-            ng-click="select(item)"
-            ng-class="{ selected: isSelected(item) }"
-            ng-src="{{item.thumb_src}}"]
-
-          div.description
-            ' {{item.description}}
-
-
-      div ng-hide="#{user_signed_in?} || Auth.isAuthenticated()"
-        .ui.message
-          ' You need to
-          a.js-modal> ng-click="modalDialog.show()" href="#" Log in
-          ' to do some actions
-
-br
-br
-br
-br
-br
-br
-br
 
 = render 'modal_window'
+
+br
+br
+br
+br
+br
+br
+br

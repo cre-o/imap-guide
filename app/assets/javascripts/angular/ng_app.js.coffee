@@ -4,6 +4,9 @@
 #= require angular-google-maps
 #= require angularjs-file-upload
 
+
+# 50x50 marker 46x46 image
+
 # Initialisation
 angular.module('iMap', ['Devise', 'ngResource', 'ng-rails-csrf', 'angularFileUpload', 'uiGmapgoogle-maps'])
 
@@ -13,17 +16,23 @@ angular.module('iMap').config (uiGmapGoogleMapApiProvider) ->
   uiGmapGoogleMapApiProvider.configure
     key: gon.global.gmaps_key,
     v: '3.17',
-    libraries: 'weather, geometry, visualization'
+    libraries: 'weather,geometry,visualization'
 
 #
 # Application controller
 #
 angular.module('iMap').controller 'ApplicationController', ($scope, modalDialog, Auth, $timeout) ->
   app = @
+
   # Application menu
   app.menuActive = false
   app.toggleMenu = ->
     app.menuActive = if app.menuActive == false then true else false
+
+  # Administration toolkit
+  app.toolKitActive = false
+  app.toggleToolkit = ->
+    app.toolKitActive = if app.toolKitActive == false then true else false
 
   # Global features
   $scope.modalDialog = modalDialog
@@ -36,38 +45,62 @@ angular.module('iMap').controller 'ApplicationController', ($scope, modalDialog,
   return app
 
 #
+# Administration controller
+#
+angular.module('iMap').controller 'AdministrationController', ($scope, $timeout) ->
+  $scope.pendingUploads = []
+
+  $timeout ->
+    $scope.pendingUploads = $scope.preloadResource.pending_uploads
+  , 1
+
+  # Get uploads for administrator
+  $scope.$on 'devise:login', (event, currentUser) ->
+    console.log 123
+
+    if currentUser.role_id == 2
+      uploadsService.getAdminUploads().then (d) ->
+        $scope.pendingUploads = d
+
+  return $scope
+
+#
 # Map controller
 #
-angular.module('iMap').controller 'MapController', ($scope, locationsService) ->
+angular.module('iMap').controller 'MapController', ($scope, $timeout, locationsService, uploadsService, uiGmapIsReady) ->
   $scope.selectedUploads = []
-  $scope.locations       = []
+  markers                = []
+
+   # Locations
+  locationsService.getLocations().then (d) ->
+
+    _.each d, (l, key) ->
+      labelStyle =
+        'width': '20px'
+        'height': '20px'
+
+      markers.push {
+        id: l.id
+        icon: 'marker.png'
+        latitude: l.lat
+        longitude: l.lng
+        labelContent: "<div class='u-size'>#{l.uploads_size}</div>
+          <div class='u-cover' style='background-image: url(#{l.last_upload_src});'> </div>"
+        labelClass: 'marker-labels'
+        labelStyle: labelStyle
+        labelAnchor: '-15 60'
+        labelInBackground: false
+      }
+
+    $scope.markers = markers
 
   # Map center
   objectLatitude  = 55.0385767
   objectLongitude = 67.8679176
 
-  # Default marker
-  marker = {
-    id: 1
-  }
-  # All markers
-  markers = {}
-
-  # Locations
-  locationsService.getLocations().then (d) ->
-    _.each d, (n, key) ->
-      markers["somekey-#{key}"] =
-        id: key
-        coords:
-          latitude: n.lat
-          longitude: n.lng
-        icon: '/assets/location/markers/icon.png'
-
-    $scope.markers = markers
-
-
-  $scope.map =
+  map =
     center: { latitude: objectLatitude, longitude: objectLongitude }
+    control: {},
     options:
       scrollwheel: false
       streetViewControl: false
@@ -77,32 +110,47 @@ angular.module('iMap').controller 'MapController', ($scope, locationsService) ->
     clickedMarker:
       id: 0
       options: {}
-    events: click: (mapModel, eventName, originalEventArgs) ->
+    events:
+      click: (mapModel, eventName, originalEventArgs) ->
+        unless $scope.selectedUploads.length > 0
+          return false
+          window.alert 'please select upload for map binding'
 
-      # if $scope.selectedUploads.length == 0
-      #   alert 'please, choose any photo to save it on map'
-      #   return false
+        e = originalEventArgs[0]
+        lat = e.latLng.lat()
+        lon = e.latLng.lng()
+        $scope.map.clickedMarker =
+          id: 0
+          options:
+            labelContent: "Photo was saved into this location" # + 'lat: ' + lat + ' lon: ' + lon
+            labelClass: 'marker-labels'
+            labelAnchor: '50 0'
+          latitude: lat
+          longitude: lon
 
-      # 'this' is the directive's scope
-      #$log.info 'user defined event: ' + eventName, mapModel, originalEventArgs
-      e = originalEventArgs[0]
-      lat = e.latLng.lat()
-      lon = e.latLng.lng()
-      $scope.map.clickedMarker =
-        id: 0
-        options:
-          labelContent: "Photo was saved into this location" # + 'lat: ' + lat + ' lon: ' + lon
-          labelClass: 'marker-labels'
-          labelAnchor: '50 0'
-        latitude: lat
-        longitude: lon
+        # Save location values into database
+        locationsService.saveLocation(lat, lon, $scope.selectedUploads)
+        $scope.selectedUploads = []
 
-      # Save location values into database
-      locationsService.saveLocation(lat, lon, $scope.selectedUploads)
-      $scope.selectedUploads = []
+        # scope apply required because this event handler is outside of the angular domain
+        $scope.$apply()
 
-      #scope apply required because this event handler is outside of the angular domain
-      $scope.$apply()
+
+  # Render current photos
+  $scope.showLocation = (marker) ->
+    locationId = marker.id
+
+    uploadsService.getLocationUploads(locationId).then (d) ->
+
+      $.magnificPopup.open
+        items: d.uploads # array
+        gallery:
+          enabled: true
+        type: 'image'
+
+  $scope.map = map
+
+  return $scope
 
 
 #
@@ -110,6 +158,7 @@ angular.module('iMap').controller 'MapController', ($scope, locationsService) ->
 #
 angular.module('iMap').controller 'UploadsController', ($scope, FileUploader, $timeout, uploadsService) ->
   $scope.uploads = []
+  $scope.pendingUploads = []
 
   uploader = $scope.uploader =
     new FileUploader
@@ -126,6 +175,13 @@ angular.module('iMap').controller 'UploadsController', ($scope, FileUploader, $t
     $scope.uploads = $scope.preloadResource.uploads
   , 1
 
+  $scope.delete = (item) ->
+    uploadsService.deleteUpload(item).then (response) ->
+      if response.status == 200 # OK!
+        $scope.uploads = _.without($scope.uploads, item)
+      else
+        alert('Error while photo deletion')
+
   # Select
   $scope.select = (item) ->
     if _.findIndex($scope.selectedUploads, item) >= 0
@@ -136,8 +192,12 @@ angular.module('iMap').controller 'UploadsController', ($scope, FileUploader, $t
   $scope.isSelected = (item) ->
     _.findIndex($scope.selectedUploads, item) >= 0
 
+  $scope.authoriseWith = (action) ->
+    return action
+
   # Events
   $scope.$on 'devise:login', (event, currentUser) ->
+    # Get current user uploads
     uploadsService.getUserUploads().then (d) ->
       $scope.uploads = d
 
@@ -242,8 +302,20 @@ angular.module('iMap').factory 'locationsService', ($http) ->
 #
 angular.module('iMap').factory 'uploadsService', ($http) ->
 
+  @.deleteUpload = (upload) ->
+    $http.delete(Routes.upload_path(upload)).then (response) ->
+      return response
+
+  @.getLocationUploads = (locationId) ->
+    $http.get(Routes.location_uploads_path(locationId)).then (response) ->
+      return response.data
+
   @.getUserUploads = ->
     $http.get(Routes.user_uploads_path()).then (response) ->
+      return response.data
+
+  @.getAdminUploads = ->
+    $http.get(Routes.pending_uploads_path()).then (response) ->
       return response.data
 
   return @
@@ -255,9 +327,7 @@ angular.module('iMap').factory 'modalDialog', ->
 
   @.show = ->
     element.modal('setting', 'transition', 'scale').
-    modal('setting', 'closable', false).
     modal
-      closable: false,
       onHide: ->
         return false
       ,

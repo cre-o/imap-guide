@@ -15,14 +15,37 @@ class UploadsController < ApplicationController
     end
   end
 
+  def destroy
+    upload = current_user.uploads.find(params[:id])
+
+    if upload.destroy
+      render json: { id: params[:id] }, status: :ok
+    else
+      render json: { fail: 'something wrong' }, status: :unprocessable_entity
+    end
+  end
+
+  def pending
+    if current_user.admin?
+      render json: Upload.pending, status: :ok
+    else
+      render nothing: true, status: :unprocessable_entity
+    end
+  end
+
   def index
-    render json: Upload.all
+    uploads = params[:location_id].present?? Upload.active.where(location_id: params[:location_id]) : Upload.active
+    render json: uploads
   end
 
   private
 
+    def location_params
+      params.require(:location_id)
+    end
+
     def upload_params
-      params.require(:upload).permit(:image)
+      params.require(:upload).permit(:id, :image, :location_id)
     end
 
 end

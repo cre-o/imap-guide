@@ -1,10 +1,11 @@
 class Upload < ActiveRecord::Base
   ALLOWED_CONTENT_TYPES = %w(image/jpeg image/png image/gif)
+  STATES = %w(pending ok no)
 
   belongs_to :location
   belongs_to :user
 
-  has_attached_file :image, styles: { small: "171x171#", medium: "310x310#" },
+  has_attached_file :image, styles: { thumb: "46x46#", preview: "310x310#" },
     default_url: "/images/:style/missing.png"
 
   validates_attachment :image, presence: true,
@@ -14,6 +15,10 @@ class Upload < ActiveRecord::Base
   validates :description, length: { maximum: 300 }
 
   default_scope { order(updated_at: :desc) }
+
+  scope :ok, -> { where(state: 'ok') }
+  scope :active, -> { where(state: 'ok') }
+  scope :pending, -> { where(state: 'pending') }
 
   def info
     {

@@ -7,4 +7,8 @@ class User < ActiveRecord::Base
   has_many :locations
   has_many :uploads, dependent: :destroy
   belongs_to :role
+
+  def admin?
+    role.name == 'admin'
+  end
 end

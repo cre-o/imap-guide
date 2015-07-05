@@ -1,5 +1,5 @@
 class UploadSerializer < ActiveModel::Serializer
-  attributes :id, :big_src, :thumb_src, :description, :state
+  attributes :id, :src, :preview_src, :description, :state
 
   has_one :location
 
@@ -11,13 +11,16 @@ class UploadSerializer < ActiveModel::Serializer
     object.description.to_s
   end
 
-  def big_src
+  def src
     # ActionController::Base.helpers.image_path
     object.image.url(:original, timestamp: false)
   end
 
   def thumb_src
-    # ActionController::Base.helpers.image_path
-    object.image.url(:medium, timestamp: false)
+    object.image.url(:thumb, timestamp: false)
+  end
+
+  def preview_src
+    object.image.url(:preview, timestamp: false)
   end
 end

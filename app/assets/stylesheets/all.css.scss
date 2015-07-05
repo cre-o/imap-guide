@@ -1,5 +1,39 @@
+$green: #5bbd72;
+
 .angular-google-map-container {
   height: rem-calc(400);
+}
+
+.mfp-bg {
+  background-color: rgba(246, 246, 246, 0.5);
+}
+
+.controls {
+  .label:hover {
+    cursor: pointer;
+  }
+}
+
+.marker-labels {
+  .u-size {
+    border-radius: 10px;
+    padding: 3px;
+    color: #fff;
+    background-color: $green;
+    font-size: 10px;
+    text-align: center;
+    white-space: nowrap;
+    width: 20px;
+    position: relative;
+  }
+
+  .u-cover {
+    border: 1px solid #fff;
+    width: 46px;
+    height: 46px;
+    margin-left: -38px;
+    margin-top: -10px;
+  }
 }
 
 .b-user-actions {
@@ -14,6 +48,10 @@
   .field {
     padding-left: 30px;
     padding-right: 30px;
+  }
+
+  .unfocus {
+    opacity: .1;
   }
 }
 
@@ -141,7 +179,24 @@
   }
 }
 
+.ui {
 
+  &.dimmer.modals {
+    background: rgba(255, 255, 255, 0.65);
+  }
+
+  &.modal {
+    box-shadow: 0 2px 4px 4px rgba(0, 0, 0, 0.03);
+
+    > .header, .actions {
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.02)) #ffffff;
+      border-top: none;
+      border-bottom: none;
+    }
+  }
+}
+
+// Angular
 [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
   display: none !important;
 }

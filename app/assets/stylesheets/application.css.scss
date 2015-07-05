@@ -5,10 +5,11 @@
  * Use @import to include other stylesheets
  */
 
-@import "bourbon";   // Bourbon helpful mixins
+//@import "bourbon";   // Bourbon helpful mixins
 @import "font-awesome";
 @import "foundation_and_overrides"; // Gem
-@import "foundation_misc"; // Gem
+@import "foundation_misc";
 @import "animate";
-@import "semantic-ui";
+@import "semantic_ui"; // Local
+@import "magnific-popup";
 @import "all";

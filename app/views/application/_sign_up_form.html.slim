@@ -45,8 +45,8 @@
 
       / Invalid messages
       div ng-show="modal.signUpForm.passwordConfirmation.$dirty && modal.signUpForm.passwordConfirmation.$invalid"
-        .ui.yellow.label ng-show="modal.signUpForm.passwordConfirmation.$error.required" Please confirm your password
-        .ui.yellow.label ng-show="modal.password != modal.passwordConfirmation" Passwords are not the same
+        .ui.yellow.pointing.above.ui.label ng-show="modal.signUpForm.passwordConfirmation.$error.required" Please confirm your password
+        .ui.yellow.pointing.above.ui.label ng-show="modal.password != modal.passwordConfirmation" Passwords are not the same
       / Valid messages
       div ng-show="modal.signUpForm.passwordConfirmation.$valid"
         .ui.green.pointing.above.ui.label ok!

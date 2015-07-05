@@ -63,6 +63,9 @@ gem 'font-awesome-rails'
 #
 gem 'slim-rails', '~> 3.0.1'
 
+# Css
+gem 'magnific-popup-rails', '~> 0.9'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
@@ -85,7 +88,7 @@ group :development, :test do
   gem 'better_errors'       # Better errors for debugging
   gem 'quiet_assets'
   gem 'rails-footnotes', '>= 4', '<5' # Footnotes with dev information
-  gem 'pry-rails'           # Interactive debuging shell
+  #gem 'pry-rails'           # Interactive debuging shell
 
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug'

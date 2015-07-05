@@ -5,6 +5,7 @@ class ApplicationController < ActionController::Base
 
   before_action :preload_app
   before_action :preload_uploads
+  before_action :preload_pending_uploads
 
   respond_to :json
 
@@ -29,6 +30,19 @@ class ApplicationController < ActionController::Base
 
       @uploads = {
         uploads: uploads
+      }.to_json
+    end
+
+    def preload_pending_uploads
+      pending_uploads =
+        if user_signed_in? && current_user.admin?
+          ActiveModel::ArraySerializer.new(Upload.pending, each_serializer: UploadSerializer)
+        else
+          []
+        end
+
+      @pending_uploads = {
+        pending_uploads: pending_uploads
       }.to_json
     end
 
