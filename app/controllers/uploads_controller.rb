@@ -1,13 +1,28 @@
 class UploadsController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create]
-  before_action :validate_rights, only: [:create]
+  before_action :validate_rights, only: [:create, :destroy]
+
+  def approve
+    if current_user && current_user.admin?
+
+      upload = Upload.find_by(id: params[:upload_id])
+
+      if upload && upload.approve!
+        render nothing: true, status: :ok
+      else
+        render nothing: true, status: :gone
+      end
+    else
+      render nothing: true, status: :unauthorized
+    end
+  end
 
   def create
     upload = current_user.uploads.new(upload_params)
     upload.description = params[:description]
 
     if upload.save
-      render json: upload.info, status: :created,
+      render json: { id: upload.id }, status: :created,
         content_type: "text/plain" # internet explorer
     else
       render json: upload.errors, status: :unprocessable_entity,
@@ -16,7 +31,13 @@ class UploadsController < ApplicationController
   end
 
   def destroy
-    upload = current_user.uploads.find(params[:id])
+    if current_user.admin?
+      # admin can destroy whatever uploads
+      upload = Upload.find(params[:id])
+    else
+      # user can destroy only their uploads
+      upload = current_user.uploads.find(params[:id])
+    end
 
     if upload.destroy
       render json: { id: params[:id] }, status: :ok
@@ -27,9 +48,9 @@ class UploadsController < ApplicationController
 
   def pending
     if current_user.admin?
-      render json: Upload.pending, status: :ok
+      render json: Upload.pending, root: false, status: :ok
     else
-      render nothing: true, status: :unprocessable_entity
+      render nothing: true, status: :unauthorized
     end
   end
 

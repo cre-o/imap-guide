@@ -6,7 +6,12 @@ class LocationsController < ApplicationController
     if location.save
       # Add update uploads
       if location_params[:uploads].present?
-        current_user.uploads.where(id: location_params[:uploads]).update_all(location_id: location, state: 'ok')
+
+        update_params = { location_id: location }
+        # If current user is admin user, we can just mark them as OK
+        update_params.merge!(state: Upload.active_state) if current_user.admin?
+
+        current_user.uploads.where(id: location_params[:uploads]).update_all(update_params)
       end
 
       render json: location, status: :created,

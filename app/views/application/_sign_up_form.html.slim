@@ -25,13 +25,13 @@
       .field
         label Password
         .ui.icon.input
-          = password_field_tag 'password', '', id: 'sign-up-form-password', required: true, placeholder: 'imagine strong password with minimum of 8 symbols', 'ng-model' => 'modal.password', 'ng-minlength' => 8
+          = password_field_tag 'password', '', id: 'sign-up-form-password', required: true, placeholder: 'imagine strong password with minimum of 4 symbols', 'ng-model' => 'modal.password', 'ng-minlength' => 4
           i.lock.icon
 
         / Invalid messages
         div ng-show="modal.signUpForm.password.$dirty && modal.signUpForm.password.$invalid"
           .ui.yellow.pointing.above.ui.label ng-show="modal.signUpForm.password.$error.required" Password required
-          .ui.yellow.pointing.above.ui.label ng-show="modal.signUpForm.password.$error.minlength" Minimum password length is 8 symbols
+          .ui.yellow.pointing.above.ui.label ng-show="modal.signUpForm.password.$error.minlength" Minimum password length is 4 symbols
         / Valid messages
         div ng-show="modal.signUpForm.password.$valid"
           .ui.green.pointing.above.ui.label ok!
@@ -40,7 +40,7 @@
         label Confirm password
         .ui.icon.input
           = password_field_tag 'passwordConfirmation', '', id: 'sign-up-form-password-confirmation', required: true, placeholder: 'please retype your new password to confirm changes', \
-          class: 'span7', 'ng-model' => 'modal.passwordConfirmation', 'ng-minlength' => 8
+          class: 'span7', 'ng-model' => 'modal.passwordConfirmation', 'ng-minlength' => 4
           i.lock.icon
 
       / Invalid messages

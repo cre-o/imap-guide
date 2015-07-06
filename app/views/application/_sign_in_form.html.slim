@@ -18,11 +18,11 @@
         div ng-class="{ 'field error': modal.signInForm.$invalid && modal.signInForm.password.$invalid || modal.signInForm.$invalid }"
           .ui.icon.input ng-class=""
             = password_field_tag 'password', '', id: 'sign-in-form-password', 'ng-model' => 'modal.password', \
-              'ng-minlength' => 8
+              'ng-minlength' => 4
             i.lock.icon
 
         div ng-show="modal.signInForm.password.$dirty && modal.signInForm.password.$invalid"
-          .ui.yellow.pointing.above.ui.label ng-show="modal.signInForm.password.$error.minlength" Minimum password length is 8 symbols
+          .ui.yellow.pointing.above.ui.label ng-show="modal.signInForm.password.$error.minlength" Minimum password length is 4 symbols
 
       /.row
         .small-6.columns.end

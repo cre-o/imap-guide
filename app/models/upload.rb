@@ -1,6 +1,6 @@
 class Upload < ActiveRecord::Base
   ALLOWED_CONTENT_TYPES = %w(image/jpeg image/png image/gif)
-  STATES = %w(pending ok no)
+  STATES = %w(pending ok)
 
   belongs_to :location
   belongs_to :user
@@ -19,6 +19,7 @@ class Upload < ActiveRecord::Base
   scope :ok, -> { where(state: 'ok') }
   scope :active, -> { where(state: 'ok') }
   scope :pending, -> { where(state: 'pending') }
+  scope :with_location, -> { where.not(location_id: nil) }
 
   def info
     {
@@ -31,4 +32,19 @@ class Upload < ActiveRecord::Base
     }
   end
 
+  state_machine :state, initial: :pending do
+    event :approve do
+      transition pending: :ok
+    end
+  end
+
+  class << self
+    def default_state
+      'pending'
+    end
+
+    def active_state
+      'ok'
+    end
+  end
 end

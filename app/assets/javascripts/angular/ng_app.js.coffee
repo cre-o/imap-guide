@@ -5,8 +5,6 @@
 #= require angularjs-file-upload
 
 
-# 50x50 marker 46x46 image
-
 # Initialisation
 angular.module('iMap', ['Devise', 'ngResource', 'ng-rails-csrf', 'angularFileUpload', 'uiGmapgoogle-maps'])
 
@@ -25,7 +23,7 @@ angular.module('iMap').controller 'ApplicationController', ($scope, modalDialog,
   app = @
 
   # Application menu
-  app.menuActive = false
+  app.menuActive = true
   app.toggleMenu = ->
     app.menuActive = if app.menuActive == false then true else false
 
@@ -44,25 +42,6 @@ angular.module('iMap').controller 'ApplicationController', ($scope, modalDialog,
 
   return app
 
-#
-# Administration controller
-#
-angular.module('iMap').controller 'AdministrationController', ($scope, $timeout) ->
-  $scope.pendingUploads = []
-
-  $timeout ->
-    $scope.pendingUploads = $scope.preloadResource.pending_uploads
-  , 1
-
-  # Get uploads for administrator
-  $scope.$on 'devise:login', (event, currentUser) ->
-    console.log 123
-
-    if currentUser.role_id == 2
-      uploadsService.getAdminUploads().then (d) ->
-        $scope.pendingUploads = d
-
-  return $scope
 
 #
 # Map controller
@@ -98,7 +77,7 @@ angular.module('iMap').controller 'MapController', ($scope, $timeout, locationsS
   objectLatitude  = 55.0385767
   objectLongitude = 67.8679176
 
-  map =
+  $scope.map =
     center: { latitude: objectLatitude, longitude: objectLongitude }
     control: {},
     options:
@@ -110,30 +89,30 @@ angular.module('iMap').controller 'MapController', ($scope, $timeout, locationsS
     clickedMarker:
       id: 0
       options: {}
-    events:
-      click: (mapModel, eventName, originalEventArgs) ->
-        unless $scope.selectedUploads.length > 0
-          return false
-          window.alert 'please select upload for map binding'
+    events: click: (mapModel, eventName, originalEventArgs) ->
+      if $scope.selectedUploads.length > 0
 
         e = originalEventArgs[0]
         lat = e.latLng.lat()
         lon = e.latLng.lng()
+
         $scope.map.clickedMarker =
           id: 0
           options:
-            labelContent: "Photo was saved into this location" # + 'lat: ' + lat + ' lon: ' + lon
-            labelClass: 'marker-labels'
+            icon: 'marker-added.png'
+            labelContent: "Photo was saved into this location" #+ 'lat: ' + lat + ' lon: ' + lon
             labelAnchor: '50 0'
           latitude: lat
           longitude: lon
 
-        # Save location values into database
-        locationsService.saveLocation(lat, lon, $scope.selectedUploads)
-        $scope.selectedUploads = []
-
         # scope apply required because this event handler is outside of the angular domain
         $scope.$apply()
+
+        # Save location values into database
+        locationsService.saveLocation(lat, lon, $scope.selectedUploads)
+
+        # Empty selected uploads
+        $scope.selectedUploads = []
 
 
   # Render current photos
@@ -148,7 +127,39 @@ angular.module('iMap').controller 'MapController', ($scope, $timeout, locationsS
           enabled: true
         type: 'image'
 
-  $scope.map = map
+  return $scope
+
+
+#
+# Administration controller
+#
+angular.module('iMap').controller 'AdministrationController', ($scope, $timeout, uploadsService) ->
+  $scope.pendingUploads = []
+
+  $timeout ->
+    $scope.pendingUploads = $scope.preloadResource.pending_uploads
+  , 1
+
+  # Set item status as approved
+  $scope.approve = (item) ->
+    uploadsService.approveUpload(item).then (response) ->
+      if response.status == 200 # OK!
+        $scope.pendingUploads = _.without($scope.pendingUploads, item)
+      else
+        alert('Error while photo approving')
+
+  # Permanently delete item
+  $scope.delete = (item) ->
+    uploadsService.deleteUpload(item).then (response) ->
+      if response.status == 200 # OK!
+        $scope.pendingUploads = _.without($scope.pendingUploads, item)
+      else
+        alert('Error while photo deletion')
+
+  # Get uploads for administrator
+  $scope.$on 'devise:admin', ->
+    uploadsService.getAdminUploads().then (d) ->
+      $scope.pendingUploads = d
 
   return $scope
 
@@ -158,7 +169,6 @@ angular.module('iMap').controller 'MapController', ($scope, $timeout, locationsS
 #
 angular.module('iMap').controller 'UploadsController', ($scope, FileUploader, $timeout, uploadsService) ->
   $scope.uploads = []
-  $scope.pendingUploads = []
 
   uploader = $scope.uploader =
     new FileUploader
@@ -170,7 +180,14 @@ angular.module('iMap').controller 'UploadsController', ($scope, FileUploader, $t
     fileItem.formData.push { description: $scope.description }
     fileItem.description = $scope.description
 
-  # Get already created uploads
+  # After upload is finished we need to update saved ID information
+  uploader.onCompleteItem = (item, response, status, headers) ->
+    if status == 201
+      item['id'] = response.id
+    else
+      alert('Something happend when upload is finished')
+
+  # Get list of already created uploads
   $timeout ->
     $scope.uploads = $scope.preloadResource.uploads
   , 1
@@ -184,9 +201,7 @@ angular.module('iMap').controller 'UploadsController', ($scope, FileUploader, $t
 
   # Select
   $scope.select = (item) ->
-    if _.findIndex($scope.selectedUploads, item) >= 0
-      $scope.selectedUploads = _.without($scope.selectedUploads, item)
-    else
+    unless _.includes($scope.selectedUploads, item)
       $scope.selectedUploads.push(item)
 
   $scope.isSelected = (item) ->
@@ -197,6 +212,9 @@ angular.module('iMap').controller 'UploadsController', ($scope, FileUploader, $t
 
   # Events
   $scope.$on 'devise:login', (event, currentUser) ->
+    # If this is an admin we need to emit new event for admin
+    $scope.$broadcast 'devise:admin' if currentUser.role_id == 2
+
     # Get current user uploads
     uploadsService.getUserUploads().then (d) ->
       $scope.uploads = d
@@ -289,10 +307,8 @@ angular.module('iMap').factory 'locationsService', ($http) ->
         uploads: uploads
 
     $http.post(Routes.locations_path(), params)
-      .success (data, status, headers, config) ->
-        console.log data
       .error (data, status, headers, config) ->
-        # @TODO error action
+        alert('It was an error while saving location')
 
   return @
 
@@ -301,6 +317,10 @@ angular.module('iMap').factory 'locationsService', ($http) ->
 # Uploads loader
 #
 angular.module('iMap').factory 'uploadsService', ($http) ->
+
+  @.approveUpload = (upload) ->
+    $http.put(Routes.upload_approve_path(upload)).then (response) ->
+      return response
 
   @.deleteUpload = (upload) ->
     $http.delete(Routes.upload_path(upload)).then (response) ->

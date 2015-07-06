@@ -18,7 +18,6 @@
 
         / Marker apears only when clicked on map
         ui-gmap-marker coords="map.clickedMarker" idkey="map.clickedMarker.id" options="map.clickedMarker.options"
-          ui-gmap-window isiconvisibleonclick="true" options="map.infoWindowWithCustomClass.options"
 
   / Actions
   .row.b-user-actions ng-show="app.menuActive"
@@ -36,18 +35,18 @@
           | {{app.toolKitActive ? 'Close' : 'Open'}} admin toolkit
 
       /! Administrator
-      #admin-toolkit ng-if="Auth._currentUser.role_id == 2"  ng-show="app.toolKitActive" ng-controller="AdministrationController"
+      #admin-toolkit ng-show="app.toolKitActive && Auth._currentUser.role_id == 2" ng-controller="AdministrationController"
         div preload-resource="#{@pending_uploads}"
-        h2.text-center
-          ' Admin toolkit
+
+        h2.text-center Admin toolkit
+
         ul.small-block-grid-2.medium-block-grid-3.large-block-grid-5
           li.uploader-item ng-repeat=("item in pendingUploads")
               .controls
-                .ui.pointing.below.ui.label.thumbs ng-class="{ yellow: item.state == 'ok' }"
+                .ui.pointing.below.ui.label.thumbs.admin ng-click="approve(item)"
                   i.fa.fa-thumbs-up
                 .ui.pointing.below.ui.label.trash ng-click="delete(item)"
                   i.fa.fa-trash-o
-
 
               img.image[
                 ng-click="select(item)"

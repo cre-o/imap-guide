@@ -6,6 +6,7 @@ Rails.application.routes.draw do
 
   resources :uploads, only: [:index, :create, :destroy] do
     collection { get 'pending' }
+    put 'approve'
   end
 
   resources :locations do

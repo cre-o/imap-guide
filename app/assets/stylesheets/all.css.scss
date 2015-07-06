@@ -1,4 +1,7 @@
+// Variables
 $green: #5bbd72;
+$yellow: #f2c61f;
+$red: #d01919;
 
 .angular-google-map-container {
   height: rem-calc(400);
@@ -51,7 +54,7 @@ $green: #5bbd72;
   }
 
   .unfocus {
-    opacity: .1;
+    opacity: .2;
   }
 }
 
@@ -125,16 +128,21 @@ $green: #5bbd72;
 
     .pointing.trash {
       &:hover {
-        background-color: #d01919;
+        background-color: $red;
       }
     }
 
     .pointing.thumbs {
       &:hover {
-        background-color: #f2c61f;
+        cursor: default;
       }
     }
 
+    .pointing.thumbs.admin {
+      &:hover {
+        background-color: $yellow;
+      }
+    }
   }
 
   .image-wrap {
