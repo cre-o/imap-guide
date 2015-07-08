@@ -4,11 +4,11 @@ class UploadSerializer < ActiveModel::Serializer
   has_one :location
 
   def w
-    1000
+    512
   end
 
   def h
-    1000
+    512
   end
 
   def title

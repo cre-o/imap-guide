@@ -71,6 +71,8 @@ class ApplicationController < ActionController::Base
       uploads =
         if current_user
           ActiveModel::ArraySerializer.new(current_user.uploads, each_serializer: UploadSerializer)
+        elsif current_user && current_user.admin?
+          ActiveModel::ArraySerializer.new(Upload.active, each_serializer: UploadSerializer)
         else
           []
         end
