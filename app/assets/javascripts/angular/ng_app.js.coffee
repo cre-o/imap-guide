@@ -192,7 +192,6 @@ angular.module('iMap').controller 'UploadsController', ($scope, FileUploader, $t
           $scope.errors.push "Description #{response.errors.description}"
 
       item.remove()
-      alert "Image #{response['image']}"
 
   # Get list of already created uploads
   $timeout ->
