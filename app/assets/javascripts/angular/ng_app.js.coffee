@@ -49,15 +49,13 @@ angular.module('iMap').controller 'ApplicationController', ($scope, modalDialog,
 angular.module('iMap').controller 'MapController', ($scope, $timeout, locationsService, uploadsService, uiGmapIsReady) ->
   $scope.selectedUploads = []
   markers                = []
+  labelStyle =
+    'width': '20px'
+    'height': '20px'
 
    # Locations
   locationsService.getLocations().then (d) ->
-
     _.each d, (l, key) ->
-      labelStyle =
-        'width': '20px'
-        'height': '20px'
-
       markers.push {
         id: l.id
         icon: 'marker.png'
@@ -71,11 +69,27 @@ angular.module('iMap').controller 'MapController', ($scope, $timeout, locationsS
         labelInBackground: false
       }
 
+    # Attach new marker on map
     $scope.markers = markers
 
   # Map center
   objectLatitude  = 55.0385767
   objectLongitude = 67.8679176
+
+  $scope.uploadIntoMarker = (upload) ->
+    $scope.markers.push {
+      id: upload.id
+      icon: 'marker.png'
+      latitude: upload.location.lat
+      longitude: upload.location.lng
+      labelContent: "<div class='u-size'>#{upload.location.uploads_size}</div>
+        <div class='u-cover' style='background-image: url(#{upload.location.last_upload_src});'> </div>"
+      labelClass: 'marker-labels'
+      labelStyle: labelStyle
+      labelAnchor: '-15 60'
+      labelInBackground: false
+    }
+
 
   $scope.map =
     center: { latitude: objectLatitude, longitude: objectLongitude }
@@ -142,6 +156,8 @@ angular.module('iMap').controller 'AdministrationController', ($scope, $timeout,
     uploadsService.approveUpload(item).then (response) ->
       if response.status == 200 # OK!
         $scope.pendingUploads = _.without($scope.pendingUploads, item)
+        # Update map
+        $scope.uploadIntoMarker(item)
       else
         alert('Error while photo approving')
 
@@ -217,7 +233,6 @@ angular.module('iMap').controller 'UploadsController', ($scope, FileUploader, $t
     uploadsService.update(item).then (response) ->
       item.isEditable = false
 
-
   # Select
   $scope.select = (item) ->
     unless _.includes($scope.selectedUploads, item)
@@ -233,6 +248,9 @@ angular.module('iMap').controller 'UploadsController', ($scope, FileUploader, $t
   $scope.$on 'devise:login', (event, currentUser) ->
     # If this is an admin we need to emit new event for admin
     $scope.$broadcast 'devise:admin' if currentUser.role_id == 2
+
+    # Clean user-before uploads
+    $scope.uploads = []
 
     # Get current user uploads
     uploadsService.getUserUploads().then (d) ->
