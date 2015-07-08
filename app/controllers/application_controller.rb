@@ -69,7 +69,7 @@ class ApplicationController < ActionController::Base
 
     def preload_uploads
       uploads =
-        if current_user
+        if current_user && current_user.guest?
           ActiveModel::ArraySerializer.new(current_user.uploads, each_serializer: UploadSerializer)
         elsif current_user && current_user.admin?
           ActiveModel::ArraySerializer.new(Upload.active, each_serializer: UploadSerializer)
