@@ -186,8 +186,10 @@ angular.module('iMap').controller 'UploadsController', ($scope, FileUploader, $t
       item['id'] = response.id
     else
       if response.errors?
-        response.errors
-        $scope.errors.push response.errors
+        if response.errors.image_file_size?
+          $scope.errors.push "Image file size #{response.errors.image_file_size}"
+        if response.errors.description?
+          $scope.errors.push "Description #{response.errors.description}"
 
       item.remove()
       alert "Image #{response['image']}"

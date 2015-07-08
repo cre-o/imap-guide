@@ -51,8 +51,10 @@
         .ui.warning.message ng-show="errors.length > 0"
           i.close.icon
           .header
-            | You must register before you can do that!
-          | Visit our registration page, then try again
+            | Some errors occurred...
+          span ng-repeat="error in errors"
+            br
+            ' {{error}}
 
         /! File uploads
         h1.text-center Add your's new photo on map
