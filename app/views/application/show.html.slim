@@ -60,6 +60,12 @@
       /! User & Administror basic actions
       #user-toolkit ng-class="{ unfocus: app.toolKitActive }"
         br
+        .ui.warning.message ng-show="errors.length > 0"
+          i.close.icon
+          .header
+            | You must register before you can do that!
+          | Visit our registration page, then try again
+
         /! File uploads
         h1.text-center Add your's new photo on map
         form.ui.form

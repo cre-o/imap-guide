@@ -24,7 +24,7 @@ class UploadsController < ApplicationController
       render json: { id: upload.id }, status: :created,
         content_type: "text/plain" # internet explorer
     else
-      render json: upload.errors, status: :unprocessable_entity,
+      render json: { errors: upload.errors }, status: :unprocessable_entity,
         content_type: "text/plain" # internet explorer
     end
   end

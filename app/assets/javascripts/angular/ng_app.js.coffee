@@ -166,6 +166,7 @@ angular.module('iMap').controller 'AdministrationController', ($scope, $timeout,
 #
 angular.module('iMap').controller 'UploadsController', ($scope, FileUploader, $timeout, uploadsService) ->
   $scope.uploads = []
+  $scope.errors = []
 
   uploader = $scope.uploader =
     new FileUploader
@@ -183,6 +184,10 @@ angular.module('iMap').controller 'UploadsController', ($scope, FileUploader, $t
     if status == 201
       item['id'] = response.id
     else
+      if response.errors?
+        response.errors
+        $scope.errors.push response.errors
+
       item.remove()
       alert "Image #{response['image']}"
 
@@ -190,6 +195,9 @@ angular.module('iMap').controller 'UploadsController', ($scope, FileUploader, $t
   $timeout ->
     $scope.uploads = $scope.preloadResource.uploads
   , 1
+
+  $scope.clearErrors = ->
+    $scope.errors = []
 
   $scope.delete = (item) ->
     uploadsService.deleteUpload(item).then (response) ->
