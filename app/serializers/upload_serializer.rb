@@ -12,11 +12,7 @@ class UploadSerializer < ActiveModel::Serializer
   end
 
   def title
-    object.description.to_s
-  end
-
-  def description
-    title
+    description
   end
 
   def src
