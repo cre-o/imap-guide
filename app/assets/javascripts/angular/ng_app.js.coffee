@@ -174,8 +174,9 @@ angular.module('iMap').controller 'UploadsController', ($scope, FileUploader, $t
       autoUpload: true
 
   uploader.onAfterAddingFile = (fileItem) ->
-    fileItem.formData.push { description: $scope.description }
-    fileItem.description = $scope.description
+    if $scope.description?
+      fileItem.formData.push { description: $scope.description }
+      fileItem.description = $scope.description
 
   # After upload is finished we need to update saved ID information
   uploader.onCompleteItem = (item, response, status, headers) ->
