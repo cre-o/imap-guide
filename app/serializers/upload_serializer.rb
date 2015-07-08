@@ -35,7 +35,7 @@ class UploadSerializer < ActiveModel::Serializer
     md = (deg - d).abs * 60
     m  = md.to_i
     sd = (md - m) * 60
-    sd = sd.rand(2) # minimize
+    sd = sd.round(2) # minimize
     html_escape("#{d}°#{m}'#{sd}\"#{pos}")
   end
 
