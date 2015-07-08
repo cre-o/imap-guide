@@ -25,4 +25,4 @@
 jQuery ->
 
   $('.pswp__caption__center').on 'click', 'span', ->
-    $(@).next('input').toggle()
+    $(@).next('.copy').toggle()

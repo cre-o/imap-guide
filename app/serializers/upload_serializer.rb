@@ -19,8 +19,10 @@ class UploadSerializer < ActiveModel::Serializer
       "#{description}
       <div class='location js-location'>
       <span> #{location_time(object.location.lat,'N')}, #{location_time(object.location.lng, 'E')} </span>
-      <input type='text' style='display: none' onclick='this.focus();this.select()'
-        value='#{location_time(object.location.lat,'N')}, #{location_time(object.location.lng, 'E')}' />
+      <div class='copy' style='display: none'> copy:
+        <input type='text' onclick='this.focus();this.select()'
+          value='#{location_time(object.location.lat,'N')}, #{location_time(object.location.lng, 'E')}' />
+      </div>
       </div>"
     else
       description
