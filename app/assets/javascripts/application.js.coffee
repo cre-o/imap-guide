@@ -20,3 +20,9 @@
 #= require photoswipe
 #= require photoswipe-ui
 #= require_tree .
+
+
+jQuery ->
+
+  $('.pswp__caption__center').on 'click', 'span', ->
+    $(@).next('input').toggle()

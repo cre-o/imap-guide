@@ -1,4 +1,6 @@
 class UploadSerializer < ActiveModel::Serializer
+  include ERB::Util
+
   attributes :id, :src, :preview_src, :title, :description, :state, :w, :h
 
   has_one :location
@@ -15,7 +17,11 @@ class UploadSerializer < ActiveModel::Serializer
   def title
     if object.location_id.present?
       "#{description}
-      <div class='location'>#{location_time(object.location.lat,'N')}, #{location_time(object.location.lng, 'E')}</div>"
+      <div class='location js-location'>
+      <span> #{location_time(object.location.lat,'N')}, #{location_time(object.location.lng, 'E')} </span>
+      <input type='text' style='display: none' onclick='this.focus();this.select()'
+        value='#{location_time(object.location.lat,'N')}, #{location_time(object.location.lng, 'E')}' />
+      </div>"
     else
       description
     end
@@ -26,7 +32,7 @@ class UploadSerializer < ActiveModel::Serializer
     md = (deg - d).abs * 60
     m  = md.to_i
     sd = (md - m) * 60
-    "#{d}°#{m}'#{sd}\"#{pos}"
+    html_escape("#{d}°#{m}'#{sd}\"#{pos}")
   end
 
   def src
