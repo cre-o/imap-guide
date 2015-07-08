@@ -54,7 +54,7 @@ class UploadsController < ApplicationController
         render json: { fail: 'something wrong' }, status: :unprocessable_entity
       end
     else
-      if current_user.upload.find(params[:id]).update(description: params[:description])
+      if current_user.uploads.find(params[:id]).update(description: params[:description], state: Upload.default_state)
         render json: { id: params[:id] }, status: :ok
       else
         render json: { fail: 'something wrong' }, status: :unprocessable_entity
