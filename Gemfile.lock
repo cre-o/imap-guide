@@ -142,7 +142,6 @@ GEM
     loofah (2.0.2)
       nokogiri (>= 1.5.9)
     lumberjack (1.0.9)
-    magnific-popup-rails (0.9.9.1)
     mail (2.6.3)
       mime-types (>= 1.16, < 3)
     method_source (0.8.2)
@@ -163,6 +162,7 @@ GEM
       activesupport (>= 3.2.0)
       cocaine (~> 0.5.5)
       mime-types
+    photoswipe-rails (4.0.8a)
     pry (0.10.1)
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
@@ -289,9 +289,9 @@ DEPENDENCIES
   jquery-rails
   js-routes
   lodash-rails
-  magnific-popup-rails (~> 0.9)
   ng-rails-csrf
   paperclip (~> 4.2.0)
+  photoswipe-rails
   quiet_assets
   rack-livereload
   rails (= 4.2.1)

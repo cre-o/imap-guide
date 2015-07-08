@@ -1,19 +1,26 @@
 class UploadSerializer < ActiveModel::Serializer
-  attributes :id, :src, :preview_src, :description, :state
+  attributes :id, :src, :preview_src, :title, :description, :state, :w, :h
 
   has_one :location
 
-  # def location
-  #   object.location
-  # end
+  def w
+    1000
+  end
 
-  def description
+  def h
+    1000
+  end
+
+  def title
     object.description.to_s
   end
 
+  def description
+    title
+  end
+
   def src
-    # ActionController::Base.helpers.image_path
-    object.image.url(:original, timestamp: false)
+    object.image.url(:large, timestamp: false)
   end
 
   def thumb_src

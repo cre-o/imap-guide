@@ -24,7 +24,7 @@
     .small-12.columns ng-controller="UploadsController" ng-cloak=""
       div preload-resource="#{@uploads}"
 
-      div.text-center ng-show="Auth._currentUser"
+      div.text-center ng-show="Auth._currentUser.role_id == 2"
         br
         | Welcome, {{Auth._currentUser.email}}!
         = link_to destroy_user_session_path, method: :delete, title: 'logout', class: 'item' do
@@ -67,11 +67,10 @@
             .ui.action.input
               input type="text" ng-model="description" name="upload[description]" placeholder="Description"
 
-              button#upload-button.ui.big.yellow.labeled.icon.button ng-click="Auth.isAuthenticated() || authoriseWith(modalDialog.show())"
+              button#upload-button.ui.big.yellow.labeled.icon.button
                 i.photo.icon
                 | Add photo
                 input[
-                  ng-if="Auth._currentUser"
                   name="upload[image]"
                   type="file"
                   nv-file-select=""
@@ -101,7 +100,6 @@
                 title="{{item.file.name}}"
                 ng-click="select(item)"
                 ng-class="{ selected: isSelected(item) }"
-                ng-disabled="!Auth._currentUser"
                 ng-thumb="{ file: item._file, width: 171, height: 171 }"]
 
               / Loading state
@@ -129,13 +127,12 @@
               ' {{item.description}}
 
 
-        div ng-hide="#{user_signed_in?} || Auth.isAuthenticated()"
-          .ui.message
-            ' You need to
-            a.js-modal> ng-click="modalDialog.show()" href="#" Log in
-            ' to do some actions
+        .text-center ng-show="Auth._currentUser.role_id != 2"
+          br
+          a.js-modal> ng-click="modalDialog.show()" href="#" ...Moderator?
 
 
+= render 'photoswipe'
 = render 'modal_window'
 
 br

@@ -17,5 +17,6 @@
 #= require angular/ng_app
 #= require js-routes
 #= require semantic-ui
-#= require magnific-popup
+#= require photoswipe
+#= require photoswipe-ui
 #= require_tree .

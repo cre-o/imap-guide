@@ -11,4 +11,8 @@ class User < ActiveRecord::Base
   def admin?
     role.name == 'admin'
   end
+
+  def guest?
+    name == 'guest'
+  end
 end

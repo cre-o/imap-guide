@@ -118,14 +118,11 @@ angular.module('iMap').controller 'MapController', ($scope, $timeout, locationsS
   # Render current photos
   $scope.showLocation = (marker) ->
     locationId = marker.id
+    pswpElement = document.querySelectorAll('.pswp')[0]
 
     uploadsService.getLocationUploads(locationId).then (d) ->
-
-      $.magnificPopup.open
-        items: d.uploads # array
-        gallery:
-          enabled: true
-        type: 'image'
+      gallery = new PhotoSwipe( pswpElement, PhotoSwipeUI_Default, d.uploads)
+      gallery.init()
 
   return $scope
 
@@ -185,7 +182,8 @@ angular.module('iMap').controller 'UploadsController', ($scope, FileUploader, $t
     if status == 201
       item['id'] = response.id
     else
-      alert('Something happend when upload is finished')
+      item.remove()
+      alert "Image #{response['image']}"
 
   # Get list of already created uploads
   $timeout ->
@@ -255,9 +253,7 @@ angular.module('iMap').controller 'ModalController', ($scope, $http, modalDialog
       email: modal.email
       password: modal.password
 
-    config =
-      headers:
-        'X-HTTP-Method-Override': 'POST'
+    config = headers: 'X-HTTP-Method-Override': 'POST'
 
     # SignIn form processing
     if modal.isSignInForm()
@@ -268,20 +264,7 @@ angular.module('iMap').controller 'ModalController', ($scope, $http, modalDialog
         # Authentication failed...
         modal.formError = true
         modal["#{modal.currentAction}Form"].$invalid = true
-
-    # SignUp form processing
-    if modal.isSignUpForm()
-      # Add password_confirmation
-      _.merge(credentials, { password_confirmation: modal.passwordConfirmation })
-
-      Auth.register(credentials, config).then ((registeredUser) ->
-        modalDialog.hide()
-      ), (error) ->
-        # Authentication failed...
-        modal.formError = true
-        modal["#{modal.currentAction}Form"].$invalid = true
-
-    return false
+        return false
 
   return modal
 

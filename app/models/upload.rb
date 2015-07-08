@@ -5,7 +5,7 @@ class Upload < ActiveRecord::Base
   belongs_to :location
   belongs_to :user
 
-  has_attached_file :image, styles: { thumb: "46x46#", preview: "310x310#" },
+  has_attached_file :image, styles: { thumb: "46x46#", preview: "310x310#", large: '1000x1000#' },
     default_url: "/images/:style/missing.png"
 
   validates_attachment :image, presence: true,

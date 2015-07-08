@@ -7,8 +7,12 @@ $red: #d01919;
   height: rem-calc(400);
 }
 
-.mfp-bg {
+.pswp__bg {
   background-color: rgba(246, 246, 246, 0.5);
+}
+
+.pswp__caption__center {
+  color: #fff;
 }
 
 .controls {

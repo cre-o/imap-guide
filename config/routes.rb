@@ -10,7 +10,7 @@ Rails.application.routes.draw do
   end
 
   resources :locations do
-    root to: :index
+    root action: :index
 
     resources :uploads, only: [:index, :show]
   end

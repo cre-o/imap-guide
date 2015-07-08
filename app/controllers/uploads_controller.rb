@@ -1,6 +1,5 @@
 class UploadsController < ApplicationController
-  skip_before_action :verify_authenticity_token, only: [:create]
-  before_action :validate_rights, only: [:create, :destroy]
+  skip_before_action :verify_authenticity_token, only: [:create, :approve]
 
   def approve
     if current_user && current_user.admin?

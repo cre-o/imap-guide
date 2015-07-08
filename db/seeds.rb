@@ -6,7 +6,7 @@ ActiveRecord::Base.transaction do
   Role.create! id: 2, name: 'admin'
 end
 
-# Create admin user
+# Create basic user admin user
 ActiveRecord::Base.transaction do
   User.create! name: 'admin', surname: 'admin',
     role: Role.find_by(name: 'admin'),
