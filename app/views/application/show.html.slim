@@ -42,7 +42,7 @@
 
         ul.small-block-grid-2.medium-block-grid-3.large-block-grid-5
           li.uploader-item ng-repeat=("item in pendingUploads")
-            = render 'image'
+            = render partial: 'image_section', locals: { uploader: false }
 
 
       /! User & Administror basic actions
@@ -80,35 +80,11 @@
         ul.small-block-grid-2.medium-block-grid-3.large-block-grid-5
           / Uploader items
           li.uploader-item ng-repeat=("item in uploader.queue")
-            .controls
-              .ui.pointing.below.ui.label.thumbs ng-class="{ yellow: item.state == 'ok' }"
-                i.fa.fa-thumbs-up
-              .ui.pointing.below.ui.label.trash ng-show="item.isSuccess" ng-click="delete(item)"
-                i.fa.fa-trash-o
-
-            div.image-wrap ng-class="{ 'ui active dimmer': item.isUploading }"
-              / Fresh label
-              .ui.ribbon.mini.label fresh
-
-              / Thumbnail render
-              .thumbnail.image[
-                ng-show="uploader.isHTML5"
-                title="{{item.file.name}}"
-                ng-click="select(item)"
-                ng-class="{ selected: isSelected(item) }"
-                ng-thumb="{ file: item._file, width: 171, height: 171 }"]
-
-              / Loading state
-              .ui.mini.text.loader Loading
-
-              / Image description
-              div.description
-                ' {{item.description}}
-                i.fa.fa-pencil
+            = render partial: 'image_section', locals: { uploader: true }
 
           / Already added
           li.uploader-item ng-repeat=("item in uploads")
-            = render 'image'
+            = render partial: 'image_section', locals: { uploader: false }
 
 
         .text-center ng-show="Auth._currentUser.role_id != 2"

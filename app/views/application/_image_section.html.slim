@@ -1,0 +1,21 @@
+.controls
+  .ui.pointing.below.ui.label.thumbs[
+    ng-class="{ admin: Auth._currentUser.role_id == 2, yellow: item.state == 'ok' }"
+    ng-click="Auth._currentUser.role_id == 2 && approve(item)"]
+
+    i.fa.fa-thumbs-up
+  .ui.pointing.below.ui.label.trash ng-show=(uploader == true ? 'item.isSuccess' : 'true') ng-click="delete(item)"
+    i.fa.fa-trash-o
+
+- if defined?(:uploader) && uploader == true
+  div.image-wrap ng-class="{ 'ui active dimmer': item.isUploading }"
+    / Fresh label
+    .ui.ribbon.mini.label fresh
+
+    = render partial: 'image', locals: { uploader: true }
+
+    .ui.mini.text.loader Loading
+
+- else
+
+  = render partial: 'image', locals: { uploader: false }

@@ -1,17 +1,20 @@
-.controls
-  .ui.pointing.below.ui.label.thumbs[
-    ng-class="{ admin: Auth._currentUser.role_id == 2, yellow: item.state == 'ok' }"
-    ng-click="Auth._currentUser.role_id == 2 && approve(item)"]
+- if defined?(:uploader) && uploader == true
+  div.image [
+    class="thumbnail"
+    ng-show="uploader.isHTML5"
+    title="{{item.file.name}}"
+    ng-click="select(item)"
+    ng-class="{ selected: isSelected(item) }"
+    ng-src="{{item.preview_src}}"
+    ng-thumb="{ file: item._file, width: 171, height: 171 }"]
 
-    i.fa.fa-thumbs-up
-  .ui.pointing.below.ui.label.trash ng-click="delete(item)"
-    i.fa.fa-trash-o
+- else
+  img.image [
+    ng-click="select(item)"
+    ng-class="{ selected: isSelected(item) }"
+    ng-src="{{item.preview_src}}"]
 
-img.image[
-  ng-click="select(item)"
-  ng-class="{ selected: isSelected(item) }"
-  ng-src="{{item.preview_src}}"]
-
+/ Item description
 .description ng-click="edit(item)"
   div ng-hide="item.isEditable"
     ' {{item.description}}
