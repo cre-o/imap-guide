@@ -11,8 +11,14 @@ class UploadSerializer < ActiveModel::Serializer
     512
   end
 
+  # Used in gallery
   def title
-    description
+    if object.location_id.present?
+      "#{description}
+      <div class='location'>#{object.location.lat}, #{object.location.lng}</div>"
+    else
+      description
+    end
   end
 
   def src

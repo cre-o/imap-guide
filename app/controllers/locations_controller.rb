@@ -1,5 +1,5 @@
 class LocationsController < ApplicationController
-  skip_before_action :verify_authenticity_token, only: :create
+  skip_before_action :verify_authenticity_token
 
   def create
     location = current_user.locations.new lat: location_params[:lat], lng: location_params[:lng]

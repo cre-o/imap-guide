@@ -4,7 +4,7 @@ Rails.application.routes.draw do
 
   devise_for :users, controllers: { registrations: 'users/registrations', sessions: 'users/sessions' }
 
-  resources :uploads, only: [:index, :create, :destroy] do
+  resources :uploads, only: [:index, :create, :destroy, :update] do
     collection { get 'pending' }
     put 'approve'
   end

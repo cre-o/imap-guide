@@ -42,19 +42,7 @@
 
         ul.small-block-grid-2.medium-block-grid-3.large-block-grid-5
           li.uploader-item ng-repeat=("item in pendingUploads")
-              .controls
-                .ui.pointing.below.ui.label.thumbs.admin ng-click="approve(item)"
-                  i.fa.fa-thumbs-up
-                .ui.pointing.below.ui.label.trash ng-click="delete(item)"
-                  i.fa.fa-trash-o
-
-              img.image[
-                ng-click="select(item)"
-                ng-class="{ selected: isSelected(item) }"
-                ng-src="{{item.preview_src}}"]
-
-              div.description
-                ' {{item.description}}
+            = render 'image'
 
 
       /! User & Administror basic actions
@@ -114,23 +102,11 @@
               / Image description
               div.description
                 ' {{item.description}}
+                i.fa.fa-pencil
 
           / Already added
           li.uploader-item ng-repeat=("item in uploads")
-            .controls
-              .ui.pointing.below.ui.label.thumbs ng-class="{ yellow: item.state == 'ok' }"
-                i.fa.fa-thumbs-up
-              .ui.pointing.below.ui.label.trash ng-click="delete(item)"
-                i.fa.fa-trash-o
-
-
-            img.image[
-              ng-click="select(item)"
-              ng-class="{ selected: isSelected(item) }"
-              ng-src="{{item.preview_src}}"]
-
-            div.description
-              ' {{item.description}}
+            = render 'image'
 
 
         .text-center ng-show="Auth._currentUser.role_id != 2"

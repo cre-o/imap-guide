@@ -1,5 +1,5 @@
 class UploadsController < ApplicationController
-  skip_before_action :verify_authenticity_token, only: [:create, :approve]
+  skip_before_action :verify_authenticity_token
 
   def approve
     if current_user && current_user.admin?
@@ -45,6 +45,23 @@ class UploadsController < ApplicationController
     end
   end
 
+  # Updates only description
+  def update
+    if current_user.admin?
+      if Upload.find(params[:id]).update(description: params[:description])
+        render json: { id: params[:id] }, status: :ok
+      else
+        render json: { fail: 'something wrong' }, status: :unprocessable_entity
+      end
+    else
+      if current_user.upload.find(params[:id]).update(description: params[:description])
+        render json: { id: params[:id] }, status: :ok
+      else
+        render json: { fail: 'something wrong' }, status: :unprocessable_entity
+      end
+    end
+  end
+
   def pending
     if current_user.admin?
       render json: Upload.pending, root: false, status: :ok
@@ -65,7 +82,7 @@ class UploadsController < ApplicationController
     end
 
     def upload_params
-      params.require(:upload).permit(:id, :image, :location_id)
+      params.require(:upload).permit(:id, :image, :location_id, :description)
     end
 
 end

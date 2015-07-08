@@ -1,0 +1,20 @@
+.controls
+  .ui.pointing.below.ui.label.thumbs[
+    ng-class="{ admin: Auth._currentUser.role_id == 2, yellow: item.state == 'ok' }"
+    ng-click="Auth._currentUser.role_id == 2 && approve(item)"]
+
+    i.fa.fa-thumbs-up
+  .ui.pointing.below.ui.label.trash ng-click="Auth._currentUser.role_id == 2 && delete(item)"
+    i.fa.fa-trash-o
+
+img.image[
+  ng-click="select(item)"
+  ng-class="{ selected: isSelected(item) }"
+  ng-src="{{item.preview_src}}"]
+
+.description ng-click="edit(item)"
+  div ng-hide="item.isEditable"
+    ' {{item.description}}
+    i.fa.fa-pencil
+
+  textarea rows="10" ng-blur="update(item, $event)" ng-show="item.isEditable" {{item.description}}

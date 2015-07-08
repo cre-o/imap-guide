@@ -7,12 +7,11 @@ $red: #d01919;
   height: rem-calc(400);
 }
 
-.pswp__bg {
-  background-color: rgba(246, 246, 246, 0.5);
-}
-
+// Gallery
 .pswp__caption__center {
-  color: #fff;
+  .location {
+    font-size: 75%;
+  }
 }
 
 .controls {
@@ -188,6 +187,15 @@ $red: #d01919;
     padding: 5px;
     background-color: #fff;
     color: #999;
+
+    textarea {
+      width: 100%;
+      height: 40px;
+    }
+
+    &:hover {
+      cursor: pointer;
+    }
   }
 }
 

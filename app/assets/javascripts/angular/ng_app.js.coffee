@@ -153,6 +153,7 @@ angular.module('iMap').controller 'AdministrationController', ($scope, $timeout,
       else
         alert('Error while photo deletion')
 
+
   # Get uploads for administrator
   $scope.$on 'devise:admin', ->
     uploadsService.getAdminUploads().then (d) ->
@@ -205,6 +206,16 @@ angular.module('iMap').controller 'UploadsController', ($scope, FileUploader, $t
         $scope.uploads = _.without($scope.uploads, item)
       else
         alert('Error while photo deletion')
+
+  $scope.edit = (item) ->
+    item.isEditable = true
+
+  $scope.update = (item, event) ->
+    item.description = event.target.value
+
+    uploadsService.update(item).then (response) ->
+      item.isEditable = false
+
 
   # Select
   $scope.select = (item) ->
@@ -314,6 +325,10 @@ angular.module('iMap').factory 'uploadsService', ($http) ->
     $http.put(Routes.upload_approve_path(upload)).then (response) ->
       return response
 
+  @.update = (upload) ->
+    $http.put(Routes.upload_path(upload, {description: upload.description})).then (response) ->
+      return response
+
   @.deleteUpload = (upload) ->
     $http.delete(Routes.upload_path(upload)).then (response) ->
       return response
@@ -363,6 +378,34 @@ angular.module('iMap').directive 'preloadResource', ->
       scope.preloadResource = JSON.parse(attrs.preloadResource)
       element.remove()
   }
+
+angular.module('iMap').directive 'clickOutside', ($document) ->
+  restrict: 'A'
+  scope: clickOutside: '&'
+  link: (scope, elem, attr) ->
+    classList = if attr.outsideIfNot != undefined then attr.outsideIfNot.replace(', ', ',').split(',') else []
+    if attr.id != undefined
+      classList.push attr.id
+    $document.on 'click', (e) ->
+      i = 0
+      element = undefined
+      if !e.target
+        return
+      element = e.target
+      while element
+        id = element.id
+        classNames = element.className
+        if id != undefined
+          i = 0
+          while i < classList.length
+            if id.indexOf(classList[i]) > -1 or classNames.indexOf(classList[i]) > -1
+              return
+            i++
+        element = element.parentNode
+
+
+      scope.$eval scope.clickOutside
+
 
 # Canvas image as preview
 angular.module('iMap').directive 'ngThumb', [
